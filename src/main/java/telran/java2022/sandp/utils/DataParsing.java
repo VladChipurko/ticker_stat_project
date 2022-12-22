@@ -7,32 +7,48 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 
 import telran.java2022.sandp.model.Sandp;
 
 public class DataParsing {
 
-	public static List<Sandp> parsing() {
+	@SuppressWarnings("deprecation")
+	public static List<Sandp> parsingWithApache() {
+		List<Sandp> res = new ArrayList<>();	
+		try (BufferedReader br = new BufferedReader(new FileReader("HistoricalPrices.csv"));
+				CSVParser csvParser = new CSVParser(br,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase())) {
+			List<CSVRecord> csvRecords = csvParser.getRecords();
+			res = csvRecords.stream()
+					.map(r -> fillSandp(r))
+					.collect(Collectors.toList());
+		}  catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return res;
+	}
+	
+	private static Sandp fillSandp(CSVRecord csvRecord) {
+		String[] dateString = csvRecord.get(0).split("/");
+	    LocalDateTime date = LocalDateTime.of(Integer.parseInt("20" + dateString[2]), 
+	    		Integer.parseInt(dateString[0]), Integer.parseInt(dateString[1]), 18, 10);
+	    double open = Double.parseDouble(csvRecord.get(1));
+	    double high = Double.parseDouble(csvRecord.get(2));
+	    double low = Double.parseDouble(csvRecord.get(3));
+	    double close = Double.parseDouble(csvRecord.get(4));
+	    Sandp res = new Sandp(date, open, high, low, close);
+		return res;
+	}
+	
+	public static List<Sandp> parsingWithoutApache() {
 		List<Sandp> res = new ArrayList<>();
-//		try (Reader in = new FileReader("HistoricalPrices.csv");){
-//			Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in);
-//			for (CSVRecord record : records) {
-//				String[] dateString = record.get("Date").split("/");
-//			    LocalDate date = LocalDate.of(Integer.parseInt("20" + dateString[2]), 
-//			    		Integer.parseInt(dateString[0]), Integer.parseInt(dateString[1]));
-//			    double open = Double.parseDouble(record.get("Open"));
-//			    double high = Double.parseDouble(record.get("High"));
-//			    double low = Double.parseDouble(record.get("Low"));
-//			    double close = Double.parseDouble(record.get("Close"));
-//			    Sandp entity = new Sandp(date, open, high, low, close);
-//			    res.add(entity);
-//			}
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
 		try (BufferedReader br = new BufferedReader(new FileReader("HistoricalPrices.csv"));){
 			String line = br.readLine();
 			line = br.readLine();
@@ -46,10 +62,9 @@ public class DataParsing {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 		return res;
 	}
-
+	
 	private static Sandp fillSandp(String[] arr) {
 		String[] dateString = arr[0].split("/");
 	    LocalDateTime date = LocalDateTime.of(Integer.parseInt("20" + dateString[2]), 
