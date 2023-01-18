@@ -23,8 +23,8 @@ public class StaticProjectApplication implements CommandLineRunner{
 //			repository.deleteAll();
 //		}
 		if(repository.count() == 0) {
-			repository.saveAll(DataParsing.parsingWithApache());
-//			repository.saveAll(DataParsing.parsingWithoutApache());
+//			repository.saveAll(DataParsing.parsingWithApache());
+			repository.saveAll(DataParsing.parsingWithoutApache());
 		}
 	}
 

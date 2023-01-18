@@ -4,7 +4,8 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
+import telran.java2022.sandp.model.SandPDate;
 import telran.java2022.sandp.model.Sandp;
 
 public class DataParsing {
@@ -36,14 +38,10 @@ public class DataParsing {
 	}
 	
 	private static Sandp fillSandp(CSVRecord csvRecord) {
-		String[] dateString = csvRecord.get(0).split("/");
-	    LocalDateTime date = LocalDateTime.of(Integer.parseInt("20" + dateString[2]), 
-	    		Integer.parseInt(dateString[0]), Integer.parseInt(dateString[1]), 18, 10);
-	    double open = Double.parseDouble(csvRecord.get(1));
-	    double high = Double.parseDouble(csvRecord.get(2));
-	    double low = Double.parseDouble(csvRecord.get(3));
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
+		LocalDate date = LocalDate.parse(csvRecord.get(0), formatter);
 	    double close = Double.parseDouble(csvRecord.get(4));
-	    Sandp res = new Sandp(date, open, high, low, close);
+	    Sandp res = new Sandp(new SandPDate("S&P", date), close);
 		return res;
 	}
 	
@@ -66,14 +64,10 @@ public class DataParsing {
 	}
 	
 	private static Sandp fillSandp(String[] arr) {
-		String[] dateString = arr[0].split("/");
-	    LocalDateTime date = LocalDateTime.of(Integer.parseInt("20" + dateString[2]), 
-	    		Integer.parseInt(dateString[0]), Integer.parseInt(dateString[1]), 18, 10);
-	    double open = Double.parseDouble(arr[1]);
-	    double high = Double.parseDouble(arr[2]);
-	    double low = Double.parseDouble(arr[3]);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
+		LocalDate date = LocalDate.parse(arr[0], formatter);
 	    double close = Double.parseDouble(arr[4]);
-	    Sandp res = new Sandp(date, open, high, low, close);
+	    Sandp res = new Sandp(new SandPDate("S&P", date), close);
 		return res;
 	}
 }

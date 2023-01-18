@@ -1,7 +1,6 @@
 package telran.java2022.sandp.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -10,16 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Document(collection = "S&P")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = {"name", "date"})
 @ToString
-@EqualsAndHashCode(of = "date")
-public class Sandp {
+public class SandPDate {
 
-	@Id
-	private SandPDate date;
-	private double priceClose;
+	private String name;
+	private LocalDate date;
 }
