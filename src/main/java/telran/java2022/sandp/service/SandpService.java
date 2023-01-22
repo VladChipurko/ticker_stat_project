@@ -7,4 +7,7 @@ public interface SandpService {
 	
 	SandpDto findSandpByDate(SandPDate date);
 
+	void addSandp(SandpDto sandpDto);
+	
+	SandpDto deleteSandpByDate(SandPDate date);
 }
