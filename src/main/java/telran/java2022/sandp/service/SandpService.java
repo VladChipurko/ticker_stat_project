@@ -5,9 +5,11 @@ import telran.java2022.sandp.model.SandPDate;
 
 public interface SandpService {
 	
-	SandpDto findSandpByDate(SandPDate date);
-
 	void addSandp(SandpDto sandpDto);
 	
+	SandpDto findSandpByDate(SandPDate date);
+	
 	SandpDto deleteSandpByDate(SandPDate date);
+	
+	SandpDto updateSandp (SandPDate date, double priceClose);
 }

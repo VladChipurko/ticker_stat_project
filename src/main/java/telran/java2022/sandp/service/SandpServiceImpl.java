@@ -39,4 +39,12 @@ public class SandpServiceImpl implements SandpService {
 		return modelMapper.map(sandp, SandpDto.class);
 	}
 
+	@Override
+	public SandpDto updateSandp(SandPDate date, double priceClose) {
+		Sandp sandp = repository.findById(date).orElseThrow(() -> new NotFoundExeption());
+		sandp.setPriceClose(priceClose);
+		repository.save(sandp);
+		return modelMapper.map(sandp, SandpDto.class);
+	}
+
 }
