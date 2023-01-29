@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
+import telran.java2022.sandp.dto.DateBetweenDto;
 import telran.java2022.sandp.dto.SandpDto;
+import telran.java2022.sandp.dto.StatDto;
 import telran.java2022.sandp.model.SandPDate;
 import telran.java2022.sandp.service.SandpService;
 
@@ -46,5 +48,20 @@ public class SandpController {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
 		LocalDate localDate = LocalDate.parse(date, formatter);
 		return service.updateSandp(new SandPDate("S&P", localDate), priceClose);
+	}
+	
+	@PostMapping("/sandp/min/period")
+	public SandpDto findMinSandpByPeriod (@RequestBody DateBetweenDto dateBetweenDto) {
+		return service.findMinSandpByPeriod(dateBetweenDto);
+	}
+	
+	@PostMapping("/sandp/max/period")
+	public SandpDto findMaxSandpByPeriod (@RequestBody DateBetweenDto dateBetweenDto) {
+		return service.findMaxSandpByPeriod(dateBetweenDto);
+	}
+	
+	@PostMapping("/sandp/{periodDays}/{sum}/{termDays}")
+	public StatDto findStatistic(@PathVariable long periodDays, @PathVariable double sum, @PathVariable long termDays) {
+		return service.findStatistic(periodDays, sum, termDays);
 	}
 }

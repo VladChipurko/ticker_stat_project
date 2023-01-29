@@ -22,7 +22,7 @@ public class DataParsing {
 	@SuppressWarnings("deprecation")
 	public static List<Sandp> parsingWithApache() {
 		List<Sandp> res = new ArrayList<>();	
-		try (BufferedReader br = new BufferedReader(new FileReader("HistoricalPrices.csv"));
+		try (BufferedReader br = new BufferedReader(new FileReader("HistoricalData5years.csv"));
 				CSVParser csvParser = new CSVParser(br,
 						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase())) {
 			List<CSVRecord> csvRecords = csvParser.getRecords();
@@ -38,16 +38,16 @@ public class DataParsing {
 	}
 	
 	private static Sandp fillSandp(CSVRecord csvRecord) {
-	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
+	    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 		LocalDate date = LocalDate.parse(csvRecord.get(0), formatter);
-	    double close = Double.parseDouble(csvRecord.get(4));
+	    double close = Double.parseDouble(csvRecord.get(1));
 	    Sandp res = new Sandp(new SandPDate("S&P", date), close);
 		return res;
 	}
 	
 	public static List<Sandp> parsingWithoutApache() {
 		List<Sandp> res = new ArrayList<>();
-		try (BufferedReader br = new BufferedReader(new FileReader("HistoricalPrices.csv"));){
+		try (BufferedReader br = new BufferedReader(new FileReader("HistoricalData5years.csv"));){
 			String line = br.readLine();
 			line = br.readLine();
 			while(line != null) {
@@ -64,9 +64,9 @@ public class DataParsing {
 	}
 	
 	private static Sandp fillSandp(String[] arr) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 		LocalDate date = LocalDate.parse(arr[0], formatter);
-	    double close = Double.parseDouble(arr[4]);
+	    double close = Double.parseDouble(arr[1]);
 	    Sandp res = new Sandp(new SandPDate("S&P", date), close);
 		return res;
 	}
