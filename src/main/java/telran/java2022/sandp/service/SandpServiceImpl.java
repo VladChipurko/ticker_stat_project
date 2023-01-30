@@ -3,7 +3,6 @@ package telran.java2022.sandp.service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -74,16 +73,19 @@ public class SandpServiceImpl implements SandpService {
 	public StatDto findStatistic(long periodDays, double sum, long termDays) {
 		LocalDate dateStart = LocalDate.now().minusDays(periodDays + termDays);
 		List<Double> allStats = new ArrayList<>();
-		List<Sandp> allPeriod = repository.findSandpByDateDateBetween(dateStart, LocalDate.now() )
-				.collect(Collectors.toList());
-		for (int i = allPeriod.size() - 1; i >= termDays; i--) {
-			Double apy = ((sum/allPeriod.get(i).getPriceClose() * allPeriod.get(i - (int)termDays).getPriceClose())-sum)/sum*100;
+		List<Sandp> allPeriod = repository.findSandpByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now());
+		for (int i = 0; i < allPeriod.size() - termDays; i++) {
+			//сохраняться значения процента (например 10% процентов, 0.5% процента)
+			Double apy = (allPeriod.get(i + (int)termDays).getPriceClose() / allPeriod.get(i).getPriceClose() - 1) / (termDays / 365.0); 
 			allStats.add(apy);
 		}
 		double minPercent = allStats.stream().min((p1,p2) -> Double.compare(p1, p2)).orElse(null);
 		double maxPercent = allStats.stream().max((p1,p2) -> Double.compare(p1, p2)).orElse(null);
-		double minRevenue = sum + (sum * minPercent / 100);
-		double maxRevenue = sum + (sum * maxPercent / 100);
+		//ниже переводим проценты в дробь (например было 5% стало 0.05)
+		//итого сумма которая получится если вложить запрашиваемую 
+		//сумму денег на указанный период в худшем и в лучшем случае
+		double minRevenue = sum * (minPercent * ((termDays * 1.0 / 365) / 100.0) + 1);
+		double maxRevenue = sum * (maxPercent * ((termDays * 1.0 / 365) / 100.0) + 1);
 		return new StatDto(minPercent, maxPercent, minRevenue, maxRevenue);
 	}
 
