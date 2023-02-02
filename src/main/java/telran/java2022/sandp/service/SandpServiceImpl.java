@@ -74,46 +74,25 @@ public class SandpServiceImpl implements SandpService {
 		LocalDate dateStart = LocalDate.now().minusDays(periodDays + termDays);
 		List<Double> allStats = new ArrayList<>();
 		List<Sandp> allPeriod = repository.findSandpByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now());
-		for (int i = 0; i < allPeriod.size() - termDays; i++) {
-			//сохраняться значения процента (например 10% процентов, 0.5% процента)
-			Double apy = (allPeriod.get(i + (int)termDays).getPriceClose() / allPeriod.get(i).getPriceClose() - 1) / (termDays / 365.0); 
+		LocalDate lastStart = LocalDate.now().minusDays(termDays);
+		int end = allPeriod.indexOf(new Sandp(new SandPDate("S&P", lastStart), 0.0));
+		while(end < 0) {
+			end = allPeriod.indexOf(new Sandp(new SandPDate("S&P", lastStart.minusDays(1)), 0.0));
+		}
+		for (int start = 0; start < end; start++) {
+			LocalDate dateEndOfPeriod = allPeriod.get(start).getDate().getDate().plusDays(termDays);
+			while (!repository.existsById(new SandPDate("S&P", dateEndOfPeriod))) {
+				dateEndOfPeriod = dateEndOfPeriod.minusDays(1);
+			}
+			Sandp sandpEnd = repository.findById(new SandPDate("S&P", dateEndOfPeriod)).get();
+			Double apy = (sandpEnd.getPriceClose() / allPeriod.get(start).getPriceClose() - 1) / (termDays / 365.0); 
 			allStats.add(apy);
 		}
 		double minPercent = allStats.stream().min((p1,p2) -> Double.compare(p1, p2)).orElse(null);
 		double maxPercent = allStats.stream().max((p1,p2) -> Double.compare(p1, p2)).orElse(null);
-		//ниже переводим проценты в дробь (например было 5% стало 0.05)
-		//итого сумма которая получится если вложить запрашиваемую 
-		//сумму денег на указанный период в худшем и в лучшем случае
 		double minRevenue = sum * (minPercent * ((termDays * 1.0 / 365) / 100.0) + 1);
 		double maxRevenue = sum * (maxPercent * ((termDays * 1.0 / 365) / 100.0) + 1);
 		return new StatDto(minPercent, maxPercent, minRevenue, maxRevenue);
 	}
 
-//	@Override
-//	public StatDto findStatistic(long periodDays, double sum, long termDays) {
-//		LocalDate dateStart = LocalDate.now().minusDays(periodDays + termDays);
-//		LocalDate dateFinish = LocalDate.now().minusDays(periodDays);
-//		List<Double> allStats = new ArrayList<>();
-//		while(dateStart.isBefore(LocalDate.now().minusDays(termDays))) {
-//			Sandp sandpStart = repository.findById(new SandPDate("S&P", dateStart)).orElse(null);
-//			if(sandpStart != null) {
-//				Sandp sandpFinish = repository.findById(new SandPDate("S&P", dateFinish)).orElse(null);
-//				while(sandpFinish == null) {
-//					dateFinish = dateFinish.plusDays(1);
-//					sandpFinish = repository.findById(new SandPDate("S&P", dateFinish)).orElse(null);
-//				}
-//				//возможно нужно будет еще делить на term/365
-//				//пока что общий процент доходности
-//				Double apy = ((sum/sandpStart.getPriceClose() * sandpFinish.getPriceClose())-sum)/sum*100;
-//				allStats.add(apy);
-//			}
-//			dateStart.plusDays(1);
-//			dateFinish.plusDays(1);
-//		}
-//		double minPercent = allStats.stream().min((p1,p2) -> Double.compare(p1, p2)).orElse(null);
-//		double maxPercent = allStats.stream().max((p1,p2) -> Double.compare(p1, p2)).orElse(null);
-//		double minRevenue = sum + (sum * minPercent / 100);
-//		double maxRevenue = sum + (sum * maxPercent / 100);
-//		return new StatDto(minPercent, maxPercent, minRevenue, maxRevenue);
-//	}
 }

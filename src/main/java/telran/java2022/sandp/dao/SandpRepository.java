@@ -13,6 +13,5 @@ public interface SandpRepository extends CrudRepository<Sandp, SandPDate>{
 
 	Stream<Sandp> findSandpByDateDateBetween(LocalDate dateFrom, LocalDate dateTo);
 	
-	//Этот вернет отсортированный
 	List<Sandp> findSandpByDateDateBetweenOrderByDateDate(LocalDate dateFrom, LocalDate dateTo);
 }
