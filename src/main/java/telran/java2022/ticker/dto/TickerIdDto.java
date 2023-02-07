@@ -1,4 +1,6 @@
-package telran.java2022.sandp.dto;
+package telran.java2022.ticker.dto;
+
+import java.time.LocalDate;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SandpDto {
+public class TickerIdDto {
 
-	private SandPDateDto date;
-	private double priceClose;
+	private String name;
+	private LocalDate date;
 }

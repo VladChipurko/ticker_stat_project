@@ -1,6 +1,4 @@
-package telran.java2022.sandp.dto;
-
-import java.time.LocalDate;
+package telran.java2022.ticker.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class DateBetweenDto {
+public class StatDto {
 
-	private LocalDate dateFrom;
-	private LocalDate dateTo;
+	double minPercent;
+	double maxPercent;
+	double minRevenue;
+	double maxRevenue;
 }

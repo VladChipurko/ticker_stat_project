@@ -1,4 +1,4 @@
-package telran.java2022.sandp.model;
+package telran.java2022.ticker.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,16 +10,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Document(collection = "S&P")
+@Document(collection = "Tickers")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode(of = "date")
-public class Sandp {
+public class Ticker {
 
 	@Id
-	private SandPDate date;
+	private TickerId date;
 	private double priceClose;
 }
