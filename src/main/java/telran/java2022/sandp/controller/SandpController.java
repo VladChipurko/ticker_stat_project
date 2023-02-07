@@ -24,30 +24,30 @@ public class SandpController {
 
 	final SandpService service;
 	
-	@GetMapping("/sandp/{date}")
-	public SandpDto findSandpByDate(@PathVariable String date) {
+	@GetMapping("/{name}/{date}")
+	public SandpDto findSandpByDate(@PathVariable String name,@PathVariable String date) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
 		LocalDate localDate = LocalDate.parse(date, formatter);
-		return service.findSandpByDate(new SandPDate("S&P", localDate));
+		return service.findSandpByDate(new SandPDate(name.toLowerCase(), localDate));
 	}
 	
-	@PostMapping("/sandp")
+	@PostMapping("/ticker")
 	public void addSandp(@RequestBody SandpDto sandpDto) {
 		service.addSandp(sandpDto);
 	}
 	
-	@DeleteMapping("/sandp/{date}")
-	public SandpDto deleteSandpByDate(@PathVariable String date) {
+	@DeleteMapping("/{name}/{date}")
+	public SandpDto deleteSandpByDate(@PathVariable String name,@PathVariable String date) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
 		LocalDate localDate = LocalDate.parse(date, formatter);
-		return service.deleteSandpByDate(new SandPDate("S&P", localDate));
+		return service.deleteSandpByDate(new SandPDate(name.toLowerCase(), localDate));
 	}
 	
-	@PutMapping("/sandp/{date}")
-	public SandpDto updateSandp (@PathVariable String date, @RequestBody double priceClose) {
+	@PutMapping("/{name}/{date}")
+	public SandpDto updateSandp (@PathVariable String name,@PathVariable String date, @RequestBody double priceClose) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
 		LocalDate localDate = LocalDate.parse(date, formatter);
-		return service.updateSandp(new SandPDate("S&P", localDate), priceClose);
+		return service.updateSandp(new SandPDate(name.toLowerCase(), localDate), priceClose);
 	}
 	
 	@PostMapping("/sandp/min/period")

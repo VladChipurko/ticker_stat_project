@@ -94,5 +94,31 @@ public class SandpServiceImpl implements SandpService {
 		double maxRevenue = sum * (maxPercent * ((termDays * 1.0 / 365) / 100.0) + 1);
 		return new StatDto(minPercent, maxPercent, minRevenue, maxRevenue);
 	}
+	
+//	@Override
+//	public StatDto findStatistic(long periodDays, double sum, long termDays) {
+//		LocalDate dateStart = LocalDate.now().minusDays(periodDays + termDays);
+//		LocalDate dateFinish = LocalDate.now().minusDays(periodDays);
+//		List<Double> allStats = new ArrayList<>();
+//		while(dateStart.isBefore(LocalDate.now().minusDays(termDays))) {
+//			Sandp sandpStart = repository.findById(new SandPDate("S&P", dateStart)).orElse(null);
+//			if(sandpStart != null) {
+//				Sandp sandpFinish = repository.findById(new SandPDate("S&P", dateFinish)).orElse(null);
+//				while(sandpFinish == null) {
+//					dateFinish = dateFinish.plusDays(1);
+//					sandpFinish = repository.findById(new SandPDate("S&P", dateFinish)).orElse(null);
+//				}
+//				Double apy = ((sum/sandpStart.getPriceClose() * sandpFinish.getPriceClose())-sum)/sum*100;
+//				allStats.add(apy);
+//			}
+//			dateStart.plusDays(1);
+//			dateFinish.plusDays(1);
+//		}
+//		double minPercent = allStats.stream().min((p1,p2) -> Double.compare(p1, p2)).orElse(null);
+//		double maxPercent = allStats.stream().max((p1,p2) -> Double.compare(p1, p2)).orElse(null);
+//		double minRevenue = sum + (sum * minPercent / 100);
+//		double maxRevenue = sum + (sum * maxPercent / 100);
+//		return new StatDto(minPercent, maxPercent, minRevenue, maxRevenue);
+//	}
 
 }

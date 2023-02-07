@@ -19,12 +19,14 @@ public class StaticProjectApplication implements CommandLineRunner{
 
 	@Override
 	public void run(String... args) throws Exception {
-//		if(repository.count() != 0) {
-//			repository.deleteAll();
-//		}
+		if(repository.count() != 0) {
+			repository.deleteAll();
+		}
 		if(repository.count() == 0) {
 //			repository.saveAll(DataParsing.parsingWithApache());
-			repository.saveAll(DataParsing.parsingWithoutApache());
+//			repository.saveAll(DataParsing.parsingWithoutApache());
+			repository.saveAll(DataParsing.parsingWithoutApache("Sap5years.csv", "sap"));
+			repository.saveAll(DataParsing.parsingWithoutApache("Gold5years.csv", "gold"));
 		}
 	}
 
