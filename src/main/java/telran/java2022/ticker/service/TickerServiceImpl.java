@@ -85,19 +85,27 @@ public class TickerServiceImpl implements TickerService {
 			end = allPeriod.indexOf(new Ticker(new TickerId(name, lastStart.minusDays(1)), 0.0));
 		}
 		LocalDate dateEndOfPeriod = null;
+		TickerId tickerIdEnd = new TickerId(name, LocalDate.now());
+		Ticker tickerEnd = new Ticker(tickerIdEnd, 0.0);
 		for (int start = 0; start < end; start++) {
 			dateEndOfPeriod = allPeriod.get(start).getDate().getDate().plusDays(termDays);
-			while (!repository.existsById(new TickerId(name, dateEndOfPeriod))) {
+			tickerIdEnd.setDate(dateEndOfPeriod);
+			tickerEnd.setDate(tickerIdEnd);
+			int indexEnd = allPeriod.indexOf(tickerEnd);
+			while (indexEnd < 0) {
 				dateEndOfPeriod = dateEndOfPeriod.minusDays(1);
+				tickerIdEnd.setDate(dateEndOfPeriod);
+				tickerEnd.setDate(tickerIdEnd);
+				indexEnd = allPeriod.indexOf(tickerEnd);
 			}
-			Ticker tickerEnd = repository.findById(new TickerId(name, dateEndOfPeriod)).get();
-			Double apy = (tickerEnd.getPriceClose() / allPeriod.get(start).getPriceClose() - 1) / (termDays / 365.0); 
+			Double apy = (allPeriod.get(indexEnd).getPriceClose() 
+					- allPeriod.get(start).getPriceClose())/allPeriod.get(start).getPriceClose()*(365/termDays)*100;
 			allStats.add(apy);
 		}
 		double minPercent = allStats.stream().min((p1,p2) -> Double.compare(p1, p2)).orElse(null);
 		double maxPercent = allStats.stream().max((p1,p2) -> Double.compare(p1, p2)).orElse(null);
-		double minRevenue = sum * (minPercent * ((termDays * 1.0 / 365) / 100.0) + 1);
-		double maxRevenue = sum * (maxPercent * ((termDays * 1.0 / 365) / 100.0) + 1);
+		double minRevenue = sum * (minPercent / 100) + sum;
+		double maxRevenue = sum * (maxPercent / 100) + sum;
 		return new StatDto(minPercent, maxPercent, minRevenue, maxRevenue);
 	}
 
