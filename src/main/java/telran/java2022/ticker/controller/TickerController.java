@@ -64,4 +64,9 @@ public class TickerController {
 	public StatDto findStatistic(@PathVariable String name, @PathVariable long periodDays, @PathVariable double sum, @PathVariable long termDays) {
 		return service.findStatistic(name.toLowerCase(), periodDays, sum, termDays);
 	}
+	
+	@GetMapping("/{name1}/{name2}/{termDays}")
+	public double correlation(@PathVariable String name1, @PathVariable String name2, @PathVariable int termDays) {
+		return service.correlation(name1, name2, termDays);
+	}
 }
