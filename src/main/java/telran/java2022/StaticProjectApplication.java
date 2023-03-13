@@ -23,10 +23,6 @@ public class StaticProjectApplication implements CommandLineRunner{
 //			repository.deleteAll();
 //		}
 		if(repository.count() == 0) {
-//			repository.saveAll(DataParsing.parsingWithoutApache("Sap5years.csv", "sap", "MM/dd/yyyy", 1));
-//			repository.saveAll(DataParsing.parsingWithoutApache("Gold5years.csv", "gold", "MM/dd/yyyy", 1));
-//			repository.saveAll(DataParsing.parsingWithoutApache("Tesla5years.csv", "tesla", "yyyy-MM-dd", 4));
-//			repository.saveAll(DataParsing.parsingWithoutApache("Microsoft5years.csv", "microsoft", "yyyy-MM-dd", 4));
 			repository.saveAll(DataParsing.parsingWithoutApache("sap500.csv", "sap", "yyyy-MM-dd", 4));
 			repository.saveAll(DataParsing.parsingWithoutApache("gold.csv", "gold", "yyyy-MM-dd", 4));
 			repository.saveAll(DataParsing.parsingWithoutApache("tesla.csv", "tesla", "yyyy-MM-dd", 4));

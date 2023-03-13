@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -106,42 +107,82 @@ public class TickerServiceImpl implements TickerService {
 		double maxRevenue = sum * (maxPercent / 100) + sum;
 		return new StatDto(minPercent, maxPercent, minRevenue, maxRevenue);
 	}
-
+	
 	@Override
 	public double correlation(String name1, String name2, int termDays) {
 		LocalDate dateStart = LocalDate.now().minusDays(termDays);
-		List<Double> tickersFirst = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
+		double[] tickersFirst = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
 				.filter(t -> t.getDate().getName().equals(name1))
 				.map(t->t.getPriceClose())
-				.collect(Collectors.toList());
-		List<Double> tickersSecond = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
+				.mapToDouble(Double::doubleValue)
+				.toArray();
+		double[] tickersSecond = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
 				.filter(t -> t.getDate().getName().equals(name2))
 				.map(t->t.getPriceClose())
-				.collect(Collectors.toList());
-		double avrX = tickersFirst.stream()
-				.reduce(0.0, (x,y) -> x + y);
-		avrX = avrX / tickersFirst.size();
-		double avrY = tickersSecond.stream()
-				.reduce(0.0, (x,y) -> x + y);
-		avrY = avrY / tickersSecond.size();
-		double avrXY = tickersFirst.stream()
-				.map(t-> t * tickersSecond.get(tickersFirst.indexOf(t)))
-				.reduce(0.0, (x, y) -> x + y);
-		avrXY = avrXY / tickersFirst.size();
-		double tX = tickersFirst.stream()
-				.map(t->t*t)
-				.reduce(0.0, (x,y)->x+y);
-		tX = tX / tickersFirst.size();
-		tX = tX - avrX * avrX;
-		tX = Math.sqrt(tX);
-		double tY = tickersSecond.stream()
-				.map(t->t*t)
-				.reduce(0.0, (x,y)->x+y);
-		tY = tY / tickersSecond.size();
-		tY = tY - avrY * avrY;
-		tY = Math.sqrt(tY);
-		double res = (avrXY - (avrX * avrY)) / (tX * tY);
-		return res;
+				.mapToDouble(Double::doubleValue)
+				.toArray();
+		double correlation = new PearsonsCorrelation().correlation(tickersFirst, tickersSecond);
+		return correlation;
 	}
+	
+	/**
+	 * The same correlation method with dates in parameters
+	 * @param name1 First ticker
+	 * @param name2 Second ticker
+	 * @param DateBetweenDto with date from and to
+	 * @return double correlation
+	 */
+	@Override
+	public double correlation(String name1, String name2, DateBetweenDto dateBetweenDto) {
+		double[] tickersFirst = repository.findTickerByDateDateBetweenOrderByDateDate(dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
+				.filter(t -> t.getDate().getName().equals(name1))
+				.map(t->t.getPriceClose())
+				.mapToDouble(Double::doubleValue)
+				.toArray();
+		double[] tickersSecond = repository.findTickerByDateDateBetweenOrderByDateDate(dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
+				.filter(t -> t.getDate().getName().equals(name2))
+				.map(t->t.getPriceClose())
+				.mapToDouble(Double::doubleValue)
+				.toArray();
+		double correlation = new PearsonsCorrelation().correlation(tickersFirst, tickersSecond);
+		return correlation;
+	}
+
+//	@Override
+//	public double correlation(String name1, String name2, int termDays) {
+//		LocalDate dateStart = LocalDate.now().minusDays(termDays);
+//		List<Double> tickersFirst = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
+//				.filter(t -> t.getDate().getName().equals(name1))
+//				.map(t->t.getPriceClose())
+//				.collect(Collectors.toList());
+//		List<Double> tickersSecond = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
+//				.filter(t -> t.getDate().getName().equals(name2))
+//				.map(t->t.getPriceClose())
+//				.collect(Collectors.toList());
+//		double avrX = tickersFirst.stream()
+//				.reduce(0.0, (x,y) -> x + y);
+//		avrX = avrX / tickersFirst.size();
+//		double avrY = tickersSecond.stream()
+//				.reduce(0.0, (x,y) -> x + y);
+//		avrY = avrY / tickersSecond.size();
+//		double avrXY = tickersFirst.stream()
+//				.map(t-> t * tickersSecond.get(tickersFirst.indexOf(t)))
+//				.reduce(0.0, (x, y) -> x + y);
+//		avrXY = avrXY / tickersFirst.size();
+//		double tX = tickersFirst.stream()
+//				.map(t->t*t)
+//				.reduce(0.0, (x,y)->x+y);
+//		tX = tX / tickersFirst.size();
+//		tX = tX - avrX * avrX;
+//		tX = Math.sqrt(tX);
+//		double tY = tickersSecond.stream()
+//				.map(t->t*t)
+//				.reduce(0.0, (x,y)->x+y);
+//		tY = tY / tickersSecond.size();
+//		tY = tY - avrY * avrY;
+//		tY = Math.sqrt(tY);
+//		double res = (avrXY - (avrX * avrY)) / (tX * tY);
+//		return res;
+//	}
 
 }

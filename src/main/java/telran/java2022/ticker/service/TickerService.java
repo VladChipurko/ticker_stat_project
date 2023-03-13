@@ -22,4 +22,6 @@ public interface TickerService {
 	StatDto findStatistic(String name, long periodDays, double sum, long termDays);
 	
 	double correlation(String name1, String name2, int termDays);
+	
+	double correlation(String name1, String name2, DateBetweenDto dateBetweenDto);
 }

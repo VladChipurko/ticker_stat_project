@@ -69,4 +69,9 @@ public class TickerController {
 	public double correlation(@PathVariable String name1, @PathVariable String name2, @PathVariable int termDays) {
 		return service.correlation(name1, name2, termDays);
 	}
+	
+	@PostMapping("/correlation/{name1}/{name2}")
+	public double correlation(@PathVariable String name1, @PathVariable String name2, @RequestBody DateBetweenDto dateBetweenDto) {
+		return service.correlation(name1, name2, dateBetweenDto);
+	}
 }
