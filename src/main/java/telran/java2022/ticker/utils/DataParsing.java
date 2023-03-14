@@ -14,8 +14,8 @@ import telran.java2022.ticker.model.TickerId;
 public class DataParsing {
 	
 	/**
-	 * Универсальный метод парсинга  
-	 * @return лист необходимых моделей
+	 * Universal method of parsing  
+	 * @return List of tickers
 	 */
 	public static List<Ticker> parsingWithoutApache(String fileName, String name, String pattern, int numberOfClose) {
 		List<Ticker> res = new ArrayList<>();
