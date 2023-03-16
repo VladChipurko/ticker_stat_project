@@ -58,16 +58,14 @@ public class TickerServiceImpl implements TickerService {
 
 	@Override
 	public TickerDto findMinTickerByPeriod(DateBetweenDto dateBetweenDto, String name) {
-		Ticker s = repository.findTickerByDateDateBetween(dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
-				.filter(t -> t.getDate().getName().equals(name))
+		Ticker s = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(name, dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
 				.min((s1, s2) -> Double.compare(s1.getPriceClose(), s2.getPriceClose())).orElse(null);
 		return modelMapper.map(s, TickerDto.class);
 	}
 
 	@Override
 	public TickerDto findMaxTickerByPeriod(DateBetweenDto dateBetweenDto, String name) {
-		Ticker s = repository.findTickerByDateDateBetween(dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
-				.filter(t -> t.getDate().getName().equals(name))
+		Ticker s = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(name, dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
 				.max((s1, s2) -> Double.compare(s1.getPriceClose(), s2.getPriceClose())).orElse(null);
 		return modelMapper.map(s, TickerDto.class);
 	}
@@ -79,7 +77,7 @@ public class TickerServiceImpl implements TickerService {
 	public FullStatDto statistic(String name, DateBetweenDto dateBetweenDto, double sum, long termDays) {
 		List<Double> allStats = new ArrayList<>();
 		List<Ticker> datesOfEnds = new ArrayList<>();
-		List<Ticker> allPeriod = repository.findQueryByNameAndByDateBetweenOrderByDate(name, dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
+		List<Ticker> allPeriod = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(name, dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
 				.collect(Collectors.toList());
 		LocalDate lastStart = dateBetweenDto.getDateTo().minusDays(termDays);
 		int end = allPeriod.indexOf(new Ticker(new TickerId(name, lastStart), 0.0));
@@ -133,8 +131,7 @@ public class TickerServiceImpl implements TickerService {
 	public StatDto findStatistic(String name, long periodDays, double sum, long termDays) {
 		LocalDate dateStart = LocalDate.now().minusDays(periodDays + termDays);
 		List<Double> allStats = new ArrayList<>();
-		List<Ticker> allPeriod = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
-				.filter(t -> t.getDate().getName().equals(name))
+		List<Ticker> allPeriod = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(name, dateStart, LocalDate.now())
 				.collect(Collectors.toList());
 		LocalDate lastStart = LocalDate.now().minusDays(termDays);
 		int end = allPeriod.indexOf(new Ticker(new TickerId(name, lastStart), 0.0));
@@ -172,12 +169,12 @@ public class TickerServiceImpl implements TickerService {
 	@Override
 	public double correlation(String name1, String name2, int termDays) {
 		LocalDate dateStart = LocalDate.now().minusDays(termDays);
-		double[] tickersFirst = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
+		double[] tickersFirst = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(name1, dateStart, LocalDate.now())
 				.filter(t -> t.getDate().getName().equals(name1))
 				.map(t->t.getPriceClose())
 				.mapToDouble(Double::doubleValue)
 				.toArray();
-		double[] tickersSecond = repository.findTickerByDateDateBetweenOrderByDateDate(dateStart, LocalDate.now())
+		double[] tickersSecond = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(name2, dateStart, LocalDate.now())
 				.filter(t -> t.getDate().getName().equals(name2))
 				.map(t->t.getPriceClose())
 				.mapToDouble(Double::doubleValue)
@@ -191,35 +188,16 @@ public class TickerServiceImpl implements TickerService {
 	 */
 	@Override
 	public double correlation(String name1, String name2, DateBetweenDto dateBetweenDto) {
-		double[] tickersFirst = repository.findTickerByDateDateBetweenOrderByDateDate(dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
-				.filter(t -> t.getDate().getName().equals(name1))
+		double[] tickersFirst = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(name1, dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
 				.map(t->t.getPriceClose())
 				.mapToDouble(Double::doubleValue)
 				.toArray();
-		double[] tickersSecond = repository.findTickerByDateDateBetweenOrderByDateDate(dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
-				.filter(t -> t.getDate().getName().equals(name2))
+		double[] tickersSecond = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(name2, dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
 				.map(t->t.getPriceClose())
 				.mapToDouble(Double::doubleValue)
 				.toArray();
 		double correlation = new PearsonsCorrelation().correlation(tickersFirst, tickersSecond);
 		return correlation;
 	}
-	
-	/**
-	 * Experimental correlation method with query request in repository
-	 */
-//	@Override
-//	public double correlation(String name1, String name2, DateBetweenDto dateBetweenDto) {
-//		double[] tickersFirst = repository.findQueryByNameAndByDateBetweenOrderByDate(name1 , dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
-//				.map(t->t.getPriceClose())
-//				.mapToDouble(Double::doubleValue)
-//				.toArray();
-//		double[] tickersSecond = repository.findQueryByNameAndByDateBetweenOrderByDate(name2 , dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
-//				.map(t->t.getPriceClose())
-//				.mapToDouble(Double::doubleValue)
-//				.toArray();
-//		double correlation = new PearsonsCorrelation().correlation(tickersFirst, tickersSecond);
-//		return correlation;
-//	}
 
 }
