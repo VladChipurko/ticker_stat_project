@@ -26,4 +26,6 @@ public interface TickerService {
 	String correlation(String name1, String name2, int termDays);
 	
 	String correlation(String name1, String name2, DateBetweenDto dateBetweenDto);
+	
+	int updateDataByTickerName (String name);
 }

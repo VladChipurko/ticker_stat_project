@@ -82,4 +82,9 @@ public class TickerController {
 			@RequestBody DateBetweenDto dateBetweenDto) {
 		return service.correlation(name1, name2, dateBetweenDto);
 	}
+	
+	@GetMapping("/update/{name}")
+	public int updateDataByTickerName(@PathVariable String name) {
+		return service.updateDataByTickerName(name);
+	}
 }

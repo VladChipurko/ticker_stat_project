@@ -1,8 +1,11 @@
 package telran.java2022.ticker.service;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
@@ -20,6 +23,10 @@ import telran.java2022.ticker.dto.exceptions.AlreadyExistException;
 import telran.java2022.ticker.dto.exceptions.NotFoundExeption;
 import telran.java2022.ticker.model.Ticker;
 import telran.java2022.ticker.model.TickerId;
+import yahoofinance.Stock;
+import yahoofinance.YahooFinance;
+import yahoofinance.histquotes.HistoricalQuote;
+import yahoofinance.histquotes.Interval;
 
 @Service
 @RequiredArgsConstructor
@@ -189,6 +196,78 @@ public class TickerServiceImpl implements TickerService {
 			res = "inverse negligible correlation";
 		}
 		return res; 
+	}
+
+	/**
+	 * Метод автоматического обновления, нужно будет определиться за какое время
+	 * будем брать новые данные и сравнивать за это же время с тем что уже есть
+	 * Для использования метода, нужно будет перезаписать базу на данные с Yahoo
+	 * и желательно потом везде использовать названия тикеров из Yahoo
+	 * можем еще передавать количество дней за сколько хотим оновиться
+	 */
+	@Override
+	public int updateDataByTickerName(String tickerName) {
+		List<HistoricalQuote> googleHistQuotes = requestData(tickerName);
+		List<Ticker> requesTickers = new ArrayList<>();
+		googleHistQuotes.stream()
+			.forEach(e -> {
+				LocalDate date = e.getDate().toInstant().atZone(TimeZone.getDefault().toZoneId()).toLocalDate();
+				double price = e.getClose().doubleValue();
+				Ticker ticker = new Ticker(new TickerId(tickerName, date), price);
+				requesTickers.add(ticker);
+			});
+		List<Ticker> baseTickers = repository
+				.findQueryByDateNameAndDateDateBetweenOrderByDateDate(tickerName, LocalDate.now().minusDays(3), LocalDate.now())
+				.collect(Collectors.toList());
+		List<Ticker> newData = requesTickers.stream()
+				.filter(ticker -> !baseTickers.stream().anyMatch(ticker::equals))
+				.collect(Collectors.toList());
+		repository.saveAll(newData);
+		return newData.size();
+	}
+
+	private List<HistoricalQuote> requestData(String tickerName) {
+		Calendar from = Calendar.getInstance();
+		Calendar to = Calendar.getInstance();
+		from.add(Calendar.DATE, -3); 
+		Stock tickerRequest = null;
+		String symbolName = defineSymbolName(tickerName);
+		try {
+			tickerRequest = YahooFinance.get(symbolName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		List<HistoricalQuote> googleHistQuotes = new ArrayList<>();
+		try {
+			googleHistQuotes = tickerRequest.getHistory(from, to, Interval.DAILY);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return googleHistQuotes;
+	}
+
+	private String defineSymbolName(String tickerName) {
+		String symbolName;
+		switch (tickerName) {
+		case "sap":
+			symbolName = "???";
+			break;
+		case "gold":
+			symbolName = "???";
+			break;
+		case "microsoft":
+			symbolName = "???";
+			break;
+		case "tesla":
+			symbolName = "TSLA";
+			break;
+		case "apple":
+			symbolName = "???";
+			break;
+		default:
+			throw new NotFoundExeption();
+		}
+		return symbolName;
 	}
 
 }
