@@ -222,6 +222,7 @@ public class TickerServiceImpl implements TickerService {
 		List<Ticker> newData = requesTickers.stream()
 				.filter(ticker -> !baseTickers.stream().anyMatch(ticker::equals))
 				.collect(Collectors.toList());
+		//newData.forEach(t->System.out.println(t));
 		repository.saveAll(newData);
 		return newData.size();
 	}
@@ -250,19 +251,19 @@ public class TickerServiceImpl implements TickerService {
 		String symbolName;
 		switch (tickerName) {
 		case "sap":
-			symbolName = "???";
+			symbolName = "^GSPC";
 			break;
 		case "gold":
-			symbolName = "???";
+			symbolName = "GC=F";
 			break;
 		case "microsoft":
-			symbolName = "???";
+			symbolName = "MSFT";
 			break;
 		case "tesla":
 			symbolName = "TSLA";
 			break;
 		case "apple":
-			symbolName = "???";
+			symbolName = "AAPL";
 			break;
 		default:
 			throw new NotFoundExeption();
