@@ -2,6 +2,7 @@ package telran.java2022.ticker.service;
 
 import telran.java2022.ticker.dto.DateBetweenDto;
 import telran.java2022.ticker.dto.FullStatDto;
+import telran.java2022.ticker.dto.FullStatPortfolioDto;
 import telran.java2022.ticker.dto.TickerDto;
 import telran.java2022.ticker.model.TickerId;
 
@@ -28,4 +29,6 @@ public interface TickerService {
 	String correlation(String name1, String name2, DateBetweenDto dateBetweenDto);
 	
 	int updateDataByTickerName (String name);
+	
+	FullStatPortfolioDto investmentPortfolio(String[] names, DateBetweenDto dateBetweenDto, double sum, long termDays);
 }

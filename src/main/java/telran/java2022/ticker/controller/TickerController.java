@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import telran.java2022.ticker.dto.DateBetweenDto;
 import telran.java2022.ticker.dto.FullStatDto;
+import telran.java2022.ticker.dto.FullStatPortfolioDto;
+import telran.java2022.ticker.dto.NamesAndDatesDto;
 import telran.java2022.ticker.dto.TickerDto;
 import telran.java2022.ticker.model.TickerId;
 import telran.java2022.ticker.service.TickerService;
@@ -86,5 +88,10 @@ public class TickerController {
 	@GetMapping("/update/{name}")
 	public int updateDataByTickerName(@PathVariable String name) {
 		return service.updateDataByTickerName(name);
+	}
+	
+	@PostMapping("/investmentPortfolio/{sum}/{termDays}")
+	public FullStatPortfolioDto investmentPortfolio(@PathVariable double sum, @PathVariable long termDays, @RequestBody NamesAndDatesDto namesAndDatesDto) {
+		return service.investmentPortfolio(namesAndDatesDto.getNames(), namesAndDatesDto.getDateBetweenDto(), sum, termDays);
 	}
 }
