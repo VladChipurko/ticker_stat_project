@@ -10,8 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FullStatDto {
-	
-	String tickerName;
+
+	String[] tickerNames;
 	long depositPeriodDays;
 	
 	MinStatDto minStat;
@@ -19,5 +19,4 @@ public class FullStatDto {
 	
 	double avgPercent;
 	double avgRevenue;
-	
 }

@@ -9,14 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class FullStatPortfolioDto {
+public class NamesAndDatesStatDto {
 
-	String[] tickerNames;
+	String[] names;
+	DateBetweenDto dateBetweenDto;
 	long depositPeriodDays;
-	
-	MinStatDto minStat;
-	MaxStatDto maxStat;
-	
-	double avgPercent;
-	double avgRevenue;
+	int sum;
 }

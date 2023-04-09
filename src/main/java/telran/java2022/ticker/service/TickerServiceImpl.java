@@ -2,8 +2,11 @@ package telran.java2022.ticker.service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
@@ -16,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import telran.java2022.ticker.dao.TickerRepository;
 import telran.java2022.ticker.dto.DateBetweenDto;
 import telran.java2022.ticker.dto.FullStatDto;
-import telran.java2022.ticker.dto.FullStatPortfolioDto;
 import telran.java2022.ticker.dto.MaxStatDto;
 import telran.java2022.ticker.dto.MinStatDto;
 import telran.java2022.ticker.dto.TickerDto;
@@ -121,7 +123,8 @@ public class TickerServiceImpl implements TickerService {
 		double avgRevenue = sum * (avgPercent / 100) + sum;
 		int indexMin = allStats.indexOf(minPercent);
 		int indexMax = allStats.indexOf(maxPercent);
-		return new FullStatDto(name, depositPeriodDays, 
+		String[] names = {name};
+		return new FullStatDto(names, depositPeriodDays, 
 				new MinStatDto(
 						allPeriod.get(indexMin).getDate().getDate(),
 						datesOfEnds.get(indexMin).getDate().getDate(),
@@ -200,42 +203,37 @@ public class TickerServiceImpl implements TickerService {
 	}
 
 	/**
-	 * Метод автоматического обновления, нужно будет определиться за какое время
-	 * будем брать новые данные и сравнивать за это же время с тем что уже есть
-	 * Для использования метода, нужно будет перезаписать базу на данные с Yahoo
-	 * и желательно потом везде использовать названия тикеров из Yahoo
-	 * можем еще передавать количество дней за сколько хотим оновиться
+	 * Downloading new data by name and date between
 	 */
 	@Override
-	public int updateDataByTickerName(String tickerName) {
-		List<HistoricalQuote> googleHistQuotes = requestData(tickerName);
+	public int downloadDataByTickerName(String[] tickerName, DateBetweenDto dateBetweenDto) {
+		List<HistoricalQuote> googleHistQuotes = requestData(tickerName[0], dateBetweenDto);
 		List<Ticker> requesTickers = new ArrayList<>();
 		googleHistQuotes.stream()
 			.forEach(e -> {
 				LocalDate date = e.getDate().toInstant().atZone(TimeZone.getDefault().toZoneId()).toLocalDate();
-				double price = e.getClose().doubleValue();
-				Ticker ticker = new Ticker(new TickerId(tickerName, date), price);
-				requesTickers.add(ticker);
+				if(e.getClose() != null) {
+					double price = e.getClose().doubleValue();
+					Ticker ticker = new Ticker(new TickerId(tickerName[0], date), price);
+					requesTickers.add(ticker);
+				}
 			});
 		List<Ticker> baseTickers = repository
-				.findQueryByDateNameAndDateDateBetweenOrderByDateDate(tickerName, LocalDate.now().minusDays(3), LocalDate.now())
+				.findQueryByDateNameAndDateDateBetweenOrderByDateDate(tickerName[0], dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
 				.collect(Collectors.toList());
 		List<Ticker> newData = requesTickers.stream()
 				.filter(ticker -> !baseTickers.stream().anyMatch(ticker::equals))
 				.collect(Collectors.toList());
-		//newData.forEach(t->System.out.println(t));
 		repository.saveAll(newData);
 		return newData.size();
 	}
 
-	private List<HistoricalQuote> requestData(String tickerName) {
-		Calendar from = Calendar.getInstance();
-		Calendar to = Calendar.getInstance();
-		from.add(Calendar.DATE, -3); 
+	private List<HistoricalQuote> requestData(String tickerName, DateBetweenDto dateBetweenDto) {
+		Calendar from = GregorianCalendar.from(ZonedDateTime.of(dateBetweenDto.getDateFrom().atTime(0, 0), ZoneId.systemDefault()));
+		Calendar to = GregorianCalendar.from(ZonedDateTime.of(dateBetweenDto.getDateTo().atTime(0,0), ZoneId.systemDefault()));
 		Stock tickerRequest = null;
-		String symbolName = defineSymbolName(tickerName);
 		try {
-			tickerRequest = YahooFinance.get(symbolName);
+			tickerRequest = YahooFinance.get(tickerName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -248,32 +246,8 @@ public class TickerServiceImpl implements TickerService {
 		return googleHistQuotes;
 	}
 
-	private String defineSymbolName(String tickerName) {
-		String symbolName;
-		switch (tickerName) {
-		case "sap":
-			symbolName = "^GSPC";
-			break;
-		case "gold":
-			symbolName = "GC=F";
-			break;
-		case "microsoft":
-			symbolName = "MSFT";
-			break;
-		case "tesla":
-			symbolName = "TSLA";
-			break;
-		case "apple":
-			symbolName = "AAPL";
-			break;
-		default:
-			throw new NotFoundExeption();
-		}
-		return symbolName;
-	}
-
 	@Override
-	public FullStatPortfolioDto investmentPortfolio(String[] names, DateBetweenDto dateBetweenDto, double sum, long depositPeriodDays) {
+	public FullStatDto investmentPortfolio(String[] names, DateBetweenDto dateBetweenDto, double sum, long depositPeriodDays) {
 		List<Double> allStats = new ArrayList<>();
 		List<Ticker> datesOfEnds = new ArrayList<>();
 		List<Ticker> allPeriod = repository.findQueryByDateNameAndDateDateBetweenOrderByDateDate(names[0], dateBetweenDto.getDateFrom(), dateBetweenDto.getDateTo())
@@ -312,7 +286,7 @@ public class TickerServiceImpl implements TickerService {
 		double avgRevenue = sum * (avgPercent / 100) + sum;
 		int indexMin = allStats.indexOf(minPercent);
 		int indexMax = allStats.indexOf(maxPercent);
-		return new FullStatPortfolioDto(names, depositPeriodDays, 
+		return new FullStatDto(names, depositPeriodDays, 
 				new MinStatDto(
 						allPeriod.get(indexMin).getDate().getDate(),
 						datesOfEnds.get(indexMin).getDate().getDate(),
@@ -339,6 +313,19 @@ public class TickerServiceImpl implements TickerService {
 			}
 		}
 		return res;
+	}
+
+	@Override
+	public int deleteAllTickersByName(String name) {
+		return repository.deleteAllTickersByDateName(name);
+	}
+
+	@Override
+	public List<String> findAllTickerNames() {
+		LocalDate date = LocalDate.of(2020, 1, 7);
+		return repository.findByDateDate(date)
+				.map(t->t.getDate().getName())
+				.collect(Collectors.toList());
 	}
 
 }

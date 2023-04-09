@@ -1,8 +1,9 @@
 package telran.java2022.ticker.service;
 
+import java.util.List;
+
 import telran.java2022.ticker.dto.DateBetweenDto;
 import telran.java2022.ticker.dto.FullStatDto;
-import telran.java2022.ticker.dto.FullStatPortfolioDto;
 import telran.java2022.ticker.dto.TickerDto;
 import telran.java2022.ticker.model.TickerId;
 
@@ -13,6 +14,8 @@ public interface TickerService {
 	TickerDto findTickerByDate(TickerId date);
 	
 	TickerDto deleteTickerByDate(TickerId date);
+	
+	int deleteAllTickersByName(String name);
 	
 	TickerDto updateTicker (TickerId date, double priceClose);
 	
@@ -28,7 +31,9 @@ public interface TickerService {
 	
 	String correlation(String name1, String name2, DateBetweenDto dateBetweenDto);
 	
-	int updateDataByTickerName (String name);
+	int downloadDataByTickerName (String[] name, DateBetweenDto dateBetweenDto);
 	
-	FullStatPortfolioDto investmentPortfolio(String[] names, DateBetweenDto dateBetweenDto, double sum, long termDays);
+	FullStatDto investmentPortfolio(String[] names, DateBetweenDto dateBetweenDto, double sum, long termDays);
+	
+	List<String> findAllTickerNames();
 }

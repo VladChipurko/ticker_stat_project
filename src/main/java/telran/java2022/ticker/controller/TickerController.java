@@ -2,6 +2,7 @@ package telran.java2022.ticker.controller;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import telran.java2022.ticker.dto.DateBetweenDto;
 import telran.java2022.ticker.dto.FullStatDto;
-import telran.java2022.ticker.dto.FullStatPortfolioDto;
 import telran.java2022.ticker.dto.NamesAndDatesDto;
+import telran.java2022.ticker.dto.NamesAndDatesStatDto;
 import telran.java2022.ticker.dto.TickerDto;
 import telran.java2022.ticker.model.TickerId;
 import telran.java2022.ticker.service.TickerService;
@@ -26,72 +27,86 @@ public class TickerController {
 
 	final TickerService service;
 
-	@GetMapping("/{name}/{date}")
+	@GetMapping("/financials/ticker/{name}/{date}")
 	public TickerDto findSandpByDate(@PathVariable String name, @PathVariable String date) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		LocalDate localDate = LocalDate.parse(date, formatter);
-		return service.findTickerByDate(new TickerId(name.toLowerCase(), localDate));
+		return service.findTickerByDate(new TickerId(name, localDate));
 	}
 
-	@PostMapping("/ticker")
+	@PostMapping("/financials/ticker")
 	public void addSandp(@RequestBody TickerDto sandpDto) {
 		service.addTicker(sandpDto);
 	}
 
-	@DeleteMapping("/{name}/{date}")
+	@DeleteMapping("/financials/{name}/{date}")
 	public TickerDto deleteSandpByDate(@PathVariable String name, @PathVariable String date) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		LocalDate localDate = LocalDate.parse(date, formatter);
-		return service.deleteTickerByDate(new TickerId(name.toLowerCase(), localDate));
+		return service.deleteTickerByDate(new TickerId(name, localDate));
+	}
+	
+	@DeleteMapping("/financials/{name}")
+	public int deleteAllTickersByName(@PathVariable String name) {
+		return service.deleteAllTickersByName(name);
 	}
 
-	@PutMapping("/{name}/{date}")
+	@PutMapping("/financials/{name}/{date}")
 	public TickerDto updateSandp(@PathVariable String name, @PathVariable String date, @RequestBody double priceClose) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd_MM_yyyy");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 		LocalDate localDate = LocalDate.parse(date, formatter);
-		return service.updateTicker(new TickerId(name.toLowerCase(), localDate), priceClose);
+		return service.updateTicker(new TickerId(name, localDate), priceClose);
 	}
 
-	@PostMapping("/{name}/min/period")
+	@PostMapping("/financials/min/{name}")
 	public TickerDto findMinSandpByPeriod(@RequestBody DateBetweenDto dateBetweenDto, @PathVariable String name) {
-		return service.findMinTickerByPeriod(dateBetweenDto, name.toLowerCase());
+		return service.findMinTickerByPeriod(dateBetweenDto, name);
 	}
 
-	@PostMapping("/{name}/max/period")
+	@PostMapping("/financials/max/{name}")
 	public TickerDto findMaxSandpByPeriod(@RequestBody DateBetweenDto dateBetweenDto, @PathVariable String name) {
-		return service.findMaxTickerByPeriod(dateBetweenDto, name.toLowerCase());
+		return service.findMaxTickerByPeriod(dateBetweenDto, name);
 	}
 
-	@PostMapping("/stat/{name}/{sum}/{termDays}")
-	public FullStatDto statistic(@PathVariable String name, @RequestBody DateBetweenDto dateBetweenDto,
-			@PathVariable double sum, @PathVariable long termDays) {
-		return service.statistic(name, dateBetweenDto, sum, termDays);
+	@PostMapping("/financials/statistic")
+	public FullStatDto statistic(@RequestBody NamesAndDatesStatDto namesAndDatesStatDto) {
+		return service.statistic(namesAndDatesStatDto.getNames()[0],
+				namesAndDatesStatDto.getDateBetweenDto(),
+				namesAndDatesStatDto.getSum(),
+				namesAndDatesStatDto.getDepositPeriodDays());
 	}
 
-	@PostMapping("/stat/{name}/{periodDays}/{sum}/{termDays}")
+	@PostMapping("/financials/statistic/{name}/{periodDays}/{sum}/{termDays}")
 	public FullStatDto statistic(@PathVariable String name, @PathVariable long periodDays, @PathVariable double sum,
 			@PathVariable long termDays) {
-		return service.statistic(name.toLowerCase(), periodDays, sum, termDays);
+		return service.statistic(name, periodDays, sum, termDays);
 	}
 
-	@GetMapping("/correlation/{name1}/{name2}/{termDays}")
+	@GetMapping("/financials/correlation/{name1}/{name2}/{termDays}")
 	public String correlation(@PathVariable String name1, @PathVariable String name2, @PathVariable int termDays) {
 		return service.correlation(name1, name2, termDays);
 	}
 
-	@PostMapping("/correlation/{name1}/{name2}")
-	public String correlation(@PathVariable String name1, @PathVariable String name2,
-			@RequestBody DateBetweenDto dateBetweenDto) {
-		return service.correlation(name1, name2, dateBetweenDto);
+	@PostMapping("/financials/correlation")
+	public String correlation(@RequestBody NamesAndDatesDto namesAndDatesDto) {
+		return service.correlation(namesAndDatesDto.getNames()[0], namesAndDatesDto.getNames()[1], namesAndDatesDto.getDateBetweenDto());
 	}
 	
-	@GetMapping("/update/{name}")
-	public int updateDataByTickerName(@PathVariable String name) {
-		return service.updateDataByTickerName(name);
+	@PostMapping("/financials/download")
+	public int downloadDataByTickerName(@RequestBody NamesAndDatesDto namesAndDatesDto) {
+		return service.downloadDataByTickerName(namesAndDatesDto.getNames(), namesAndDatesDto.getDateBetweenDto());
 	}
 	
-	@PostMapping("/investmentPortfolio/{sum}/{termDays}")
-	public FullStatPortfolioDto investmentPortfolio(@PathVariable double sum, @PathVariable long termDays, @RequestBody NamesAndDatesDto namesAndDatesDto) {
-		return service.investmentPortfolio(namesAndDatesDto.getNames(), namesAndDatesDto.getDateBetweenDto(), sum, termDays);
+	@PostMapping("/financials/statistic/investmentPortfolio")
+	public FullStatDto investmentPortfolio(@RequestBody NamesAndDatesStatDto namesAndDatesStatDto) {
+		return service.investmentPortfolio(namesAndDatesStatDto.getNames(), 
+				namesAndDatesStatDto.getDateBetweenDto(), 
+				namesAndDatesStatDto.getSum(), 
+				namesAndDatesStatDto.getDepositPeriodDays());
+	}
+	
+	@GetMapping("/financials/tickers")
+	public List<String> findAllTickerNames(){
+		return service.findAllTickerNames();
 	}
 }
