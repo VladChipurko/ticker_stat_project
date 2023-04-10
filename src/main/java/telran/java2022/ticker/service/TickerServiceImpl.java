@@ -246,6 +246,9 @@ public class TickerServiceImpl implements TickerService {
 		return googleHistQuotes;
 	}
 
+	/**
+	 * Statistic of investment bag, we can add more tickers to analyze 
+	 */
 	@Override
 	public FullStatDto investmentPortfolio(String[] names, DateBetweenDto dateBetweenDto, double sum, long depositPeriodDays) {
 		List<Double> allStats = new ArrayList<>();
