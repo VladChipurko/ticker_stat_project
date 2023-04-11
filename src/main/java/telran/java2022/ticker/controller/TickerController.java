@@ -34,7 +34,7 @@ public class TickerController {
 		return service.findTickerByDate(new TickerId(name, localDate));
 	}
 
-	@PostMapping("/financials/ticker")
+	@PostMapping("/financials/add/ticker")
 	public void addSandp(@RequestBody TickerDto sandpDto) {
 		service.addTicker(sandpDto);
 	}

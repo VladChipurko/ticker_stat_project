@@ -16,10 +16,11 @@ public class SecurityService {
 		httpSecurity.csrf().disable();
 		httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		httpSecurity.authorizeRequests(authorize -> authorize
-				.mvcMatchers("/account/register/**", "/financials/ticker/*/*/**", "/financials/tickers/**").permitAll()
-				.mvcMatchers("/account/user/*/role/*/**", "/financials/download/*/**", "/financials/ticker/**").hasRole("ADMIN")
-				.mvcMatchers(HttpMethod.DELETE, "/financials/*/**", "/statistics/*/*/**").hasRole("ADMIN")
-				.mvcMatchers(HttpMethod.PUT, "/financials/*/*/**").hasRole("ADMIN")
+				.mvcMatchers("/account/register/**").permitAll()
+				.mvcMatchers("/financials/add/ticker/**", "/financials/download/**", "/financials/tickers/**").hasRole("ADMIN")
+				.mvcMatchers(HttpMethod.DELETE, "/financials/**").hasRole("ADMIN")
+				.mvcMatchers("/account/user/*/role/*").hasRole("ADMIN")
+				.mvcMatchers(HttpMethod.PUT, "/financials/**").hasRole("ADMIN")
 				.mvcMatchers(HttpMethod.PUT, "/account/user/{login}*").access("#login == authentication.name")
 				.mvcMatchers(HttpMethod.DELETE, "/account/user/{login}*").access("#login == authentication.name or hasRole('ADMIN')")
 				.mvcMatchers(HttpMethod.PUT, "/account/changePassword/user/{login}*").access("#login == authentication.name")
