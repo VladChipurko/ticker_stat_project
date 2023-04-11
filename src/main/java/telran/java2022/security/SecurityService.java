@@ -17,7 +17,7 @@ public class SecurityService {
 		httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		httpSecurity.authorizeRequests(authorize -> authorize
 				.mvcMatchers("/account/register/**").permitAll()
-				.mvcMatchers("/financials/add/ticker/**", "/financials/download/**", "/financials/tickers/**").hasRole("ADMIN")
+				.mvcMatchers("/financials/add/ticker/**", "/financials/download/**", "/financials/tickers/**", "/financials/update/all").hasRole("ADMIN")
 				.mvcMatchers(HttpMethod.DELETE, "/financials/**").hasRole("ADMIN")
 				.mvcMatchers("/account/user/*/role/*").hasRole("ADMIN")
 				.mvcMatchers(HttpMethod.PUT, "/financials/**").hasRole("ADMIN")

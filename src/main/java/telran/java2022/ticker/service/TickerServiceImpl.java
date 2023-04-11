@@ -330,5 +330,17 @@ public class TickerServiceImpl implements TickerService {
 				.map(t->t.getDate().getName())
 				.collect(Collectors.toList());
 	}
+	
+	@Override
+	public int updateAllTickers() {
+		List<String> names = findAllTickerNames();
+		List<Integer> res = new ArrayList<>();
+		names.stream()
+			.forEach(n -> {
+				String[] arr = {n};
+				res.add(downloadDataByTickerName(arr, new DateBetweenDto(LocalDate.now().minusDays(10), LocalDate.now())));
+			});
+		return res.stream().mapToInt(i -> i).sum();
+	}
 
 }

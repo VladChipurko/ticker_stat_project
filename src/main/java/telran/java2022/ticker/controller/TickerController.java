@@ -109,4 +109,9 @@ public class TickerController {
 	public List<String> findAllTickerNames(){
 		return service.findAllTickerNames();
 	}
+	
+	@PostMapping("/financials/update/all")
+	public int updateAllTickers() {
+		return service.updateAllTickers();
+	}
 }
