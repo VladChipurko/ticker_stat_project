@@ -14,6 +14,7 @@ public class SecurityService {
 	public SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception{
 		httpSecurity.httpBasic();
 		httpSecurity.csrf().disable();
+		httpSecurity.cors();
 		httpSecurity.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		httpSecurity.authorizeRequests(authorize -> authorize
 				.mvcMatchers("/account/register/**").permitAll()

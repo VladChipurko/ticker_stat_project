@@ -2,6 +2,7 @@ package telran.java2022.accounting.controller;
 
 import java.security.Principal;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +22,7 @@ import telran.java2022.accounting.service.UserService;
 @RestController
 @RequestMapping("/account")
 @RequiredArgsConstructor
+@CrossOrigin
 public class UserController {
 
 	final UserService service;
